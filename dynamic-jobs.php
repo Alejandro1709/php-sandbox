@@ -6,7 +6,7 @@
       'description' => 'We are seeking a skilled software engineer to develop high-quality software solutions.',
       'salary' => 80000,
       'location' => 'San Francisco',
-      'tags' => ['Software Development', 'Java', 'Python']
+      'tags' => ['Software Development', 'Java', 'Python', 'SEO']
     ],
     [
       'id' => 2,
@@ -41,6 +41,25 @@
       'tags' => []
     ],
   ];
+
+  function format($salary) {
+    return '$' . number_format($salary);
+  }
+
+  function highlightTags($tags, $searchTerm) {
+    $tagsStr = implode(', ', $tags);
+    return str_replace($searchTerm, "<span class='bg-yellow-200'>{$searchTerm}</span>", $tagsStr);
+  }
+
+  function calculateAverageSalary($jobListings) {
+    $sum = 0;
+    foreach ($jobListings as $listing) {
+      $salary = $listing['salary'];
+      $sum += $salary;
+    }
+
+    return number_format($sum / count($jobListings));
+  }
 ?>
 
 <!DOCTYPE html>
@@ -60,6 +79,9 @@
     </div>
   </header>
   <div class="container mx-auto p-4 mt-4">
+    <div class="bg-green-100 rounded-lg shadow-md p-6 my-6">
+      <h2 class="text-2xl font-semibold mb-4">Average Salary: <?= calculateAverageSalary($listings) ?></h2>
+    </div>
     <!-- Output -->
     <?php foreach ($listings as $index => $job) : ?>
       <div class="md my-4">
@@ -69,7 +91,7 @@
             <p class="text-gray-700 text-lg mt-2"><?= $job['description'] ?></p>
             <ul class="mt-4">
               <li class="mb-2">
-                <strong>Salary:</strong> <?= $job['salary'] ?>
+                <strong>Salary:</strong> <?= format($job['salary']) ?>
               </li>
               <li class="mb-2">
                 <strong>Location:</strong> <?= $job['location'] ?>
@@ -77,7 +99,7 @@
               </li>
               <?= count($job['tags']) > 0 ? '
                 <li class="mb-2">
-                  <strong>Tags:</strong>' . implode(', ', $job['tags']) . '</li>' : '' ?>
+                  <strong>Tags:</strong>' . highlightTags($job['tags'], 'SEO') . '</li>' : '' ?>
             </ul>
           </div>
         </div>
