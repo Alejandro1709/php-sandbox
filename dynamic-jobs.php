@@ -42,23 +42,21 @@
     ],
   ];
 
-  function format($salary) {
-    return '$' . number_format($salary);
-  }
+  $format = fn ($salary) => '$' . number_format($salary);
 
   function highlightTags($tags, $searchTerm) {
     $tagsStr = implode(', ', $tags);
     return str_replace($searchTerm, "<span class='bg-yellow-200'>{$searchTerm}</span>", $tagsStr);
   }
 
-  function calculateAverageSalary($jobListings) {
+  function calculateAverageSalary($jobListings, $format) {
     $sum = 0;
     foreach ($jobListings as $listing) {
       $salary = $listing['salary'];
       $sum += $salary;
     }
 
-    return number_format($sum / count($jobListings));
+    return $format($sum / count($jobListings));
   }
 ?>
 
@@ -80,7 +78,7 @@
   </header>
   <div class="container mx-auto p-4 mt-4">
     <div class="bg-green-100 rounded-lg shadow-md p-6 my-6">
-      <h2 class="text-2xl font-semibold mb-4">Average Salary: <?= calculateAverageSalary($listings) ?></h2>
+      <h2 class="text-2xl font-semibold mb-4">Average Salary: <?= calculateAverageSalary($listings, $format) ?></h2>
     </div>
     <!-- Output -->
     <?php foreach ($listings as $index => $job) : ?>
@@ -91,7 +89,7 @@
             <p class="text-gray-700 text-lg mt-2"><?= $job['description'] ?></p>
             <ul class="mt-4">
               <li class="mb-2">
-                <strong>Salary:</strong> <?= format($job['salary']) ?>
+                <strong>Salary:</strong> <?= $format($job['salary']) ?>
               </li>
               <li class="mb-2">
                 <strong>Location:</strong> <?= $job['location'] ?>
