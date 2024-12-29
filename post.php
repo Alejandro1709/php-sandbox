@@ -2,10 +2,60 @@
   $title = '';
   $description = '';
   $submitted = false;
+  $alerts = [];
 
   if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $title = htmlspecialchars($_POST['title']) ?? '';
     $description = htmlspecialchars($_POST['description']) ?? '';
+
+    $file = $_FILES['logo'];
+
+    if ($file['error'] === UPLOAD_ERR_OK) {
+      // Specify where to upload
+      $uploadDir = 'uploads/';
+
+      // Check and create directory
+      if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+      }
+
+      // Create file name
+      $filename = uniqid() . '-' . $file['name'];
+
+      // Check file type
+      $allowedExtensions = ['jpg', 'jpeg', 'png'];
+      $fileExtension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+      // Make sure extension is in array
+      if (in_array($fileExtension, $allowedExtensions)) {
+        // Upload file
+        if (move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
+
+          $successMessage = [
+            'status' => 'success',
+            'text' => 'Success!'
+          ];
+
+          array_push($alerts, $successMessage);
+
+        } else {
+          $errorMessage = [
+            'status' => 'error',
+            'text' => 'File Upload Error: ' . $file['error']
+          ];
+
+          array_push($alerts, $errorMessage);
+        }
+      } else {
+        $errorMessage = [
+          'status' => 'error',
+          'text' => 'Invalid File Type'
+        ];
+
+        array_push($alerts, $errorMessage);
+      }
+    }
+
     $submitted = true;
   }
 ?>
@@ -20,10 +70,15 @@
 </head>
 
 <body class="bg-gray-100">
-  <div class="flex justify-center items-center h-screen">
+  <div class="flex flex-col gap-6 justify-center items-center h-screen">
+    <div class="flex flex-col gap-4">
+      <?php foreach ($alerts as $alert) : ?>
+        <div class="<?= $alert['status'] === 'success' ? 'bg-green-400' : 'bg-red-400'?> p-4 rounded-md max-w-md text-white font-semibold shadow-md"><?= $alert['text'] ?></div>
+      <?php endforeach ?>
+    </div>
     <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
       <h1 class="text-2xl font-semibold mb-6">Create Job Listing</h1>
-      <form method="post">
+      <form method="post" enctype="multipart/form-data">
         <div class="mb-4">
           <label for="title" class="block text-gray-700 font-medium">Title</label>
           <input type="text" id="title" name="title" placeholder="Enter job title" class="w-full px-4 py-2 border rounded focus:ring focus:ring-blue-300 focus:outline-none">
@@ -31,6 +86,10 @@
         <div class="mb-6">
           <label for="description" class="block text-gray-700 font-medium">Description</label>
           <textarea id="description" name="description" placeholder="Enter job description" class="w-full px-4 py-2 border rounded focus:ring focus:ring-blue-300 focus:outline-none"></textarea>
+        </div>
+        <div class="mb-4">
+          <label for="logo" class="block text-gray-700 font-medium">Logo</label>
+          <input type="file" name="logo" id="logo" class="w-full px-4 py-2 border rounded focus:ring focus:ring-blue-300 focus:outline-none">
         </div>
         <div class="flex items-center justify-between">
           <button type="submit" name="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none">
